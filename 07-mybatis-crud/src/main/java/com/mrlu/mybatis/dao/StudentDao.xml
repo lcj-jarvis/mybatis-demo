@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mrlu.mybatis.dao.StudentDao">
+    <sql id="selectTemplate"> select * from student</sql>
+
+    <!--查询全部学生-->
+    <select id="selectStudents" resultType="com.mrlu.mybatis.domain.Student">
+         <include refid="selectTemplate"/>
+    </select>
+
+    <!--查询学生的总人数-->
+    <select id="selectCount" resultType="int">
+        select count(*) from student
+    </select>
+
+    <!--查询单个学生-->
+    <select id="selectStudent" resultType="com.mrlu.mybatis.domain.Student">
+        <include refid="selectTemplate"/> where id = #{id}
+    </select>
+
+    <!--插入单个学生-->
+    <insert id="insertStudent">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+    <!--删除学生-->
+    <delete id="deleteStudent">
+        delete from student where id = #{id}
+    </delete>
+
+    <!--修改学生信息-->
+    <update id="updateStudent">
+        update student set id = #{id},
+        name = #{name},email = #{email},age = #{age} where id = #{id}
+    </update>
+
+    <!--
+       批量插入学生信息
+       foreach里内容循环一次，用逗号分隔一次
+    -->
+    <insert id="insertStudentBatch">
+        insert into student values
+        <foreach collection="list" item="student" separator=",">
+            (#{student.id},#{student.name},#{student.email},#{student.age})
+        </foreach>
+    </insert>
+
+
+    <!--返回MyStudent类型-->
+    <resultMap id="myStudent" type="com.mrlu.mybatis.domain.MyStudent">
+        <id column="id" property="stuId"></id>
+        <result column="name" property="stuName"></result>
+        <result column="email" property="stuEmail"></result>
+        <result column="age" property="stuAge"></result>
+    </resultMap>
+    <select id="selectOtherType" resultMap="myStudent">
+        <include refid="selectTemplate"></include>
+    </select>
+</mapper>

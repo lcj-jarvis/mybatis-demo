@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+
+        <!--显示的指定每个我们需要更改的配置的值，即使他是默认的。防止版本更新带来的问题-->
+        <!--配置延时加载-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--配置延时加载-->
+        <setting name="aggressiveLazyLoading" value="false"/>
+    </settings>
+    <typeAliases>
+          <!--
+            第一种方式：
+            可以指定一个类型一个自定义别名
+            type：自定义类型的全类名
+            alias：别名(短小，容易记忆)
+            有个缺点：如果有很多的类要定义，就要写很多个
+          -->
+       <!-- <typeAlias type="com.mrlu.mybatis.domain.Student" alias="Student"/>
+        <typeAlias type="com.mrlu.mybatis.domain.ParamType" alias="ParamType"/>-->
+
+        <!--
+            第二种方式
+            <package> name是包名，这个包所有的类，类名就是别名(类名不区分大小写)
+
+            这种方式也会存在问题，也容易出错
+            <package name="com.mrlu.mybatis.domain"/>
+            <package name="com.mrlu.mybatis.vo"/>
+             假如这两个包中都有Student类型。，那么执行查询sql语句的时候，如果返回值类型写了Student。
+             那么就会报错。因为不知道是哪个包下的
+        -->
+        <package name="com.mrlu.mybatis.domain"/>
+
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/ssm"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <!--<mapper resource="com/mrlu/mybatis/dao/StudentDao.xml"/>-->
+        <package name="com.mrlu.mybatis.dao"/>
+    </mappers>
+</configuration>

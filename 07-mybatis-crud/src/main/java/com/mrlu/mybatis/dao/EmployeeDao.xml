@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mrlu.mybatis.dao.EmployeeDaoCache">
+
+    <select id="selectEmployees" resultType="com.mrlu.mybatis.domain.Employee">
+          select id,last_Name,gender,email from t_employee
+    </select>
+
+    <!--
+      获取自增的主键值：
+          mysql支持自增主键，自增主键的获取，mybatis也是利用statement.getGeneratedKeys()
+          useGeneratedKeys="true",表示使用自增组件获取主键值策略
+          keyProperty：指定对应的主键属性，也就是mybatis获取到主键值后，将这个值封装给javaBean的哪个属性
+    -->
+    <insert id="addEmployee" useGeneratedKeys="true" keyProperty="id" databaseId="mysql">
+          insert into t_employee(last_Name,gender,email) values(#{lastName},#{gender},#{email})
+    </insert>
+
+    <!--
+       Oracle不支持自增，Oracle使用系列来模拟自增
+       每次插入的数据的主键是从序列中拿到的值，如何获取到这个值呢？
+       有两种方式
+       1、before的方式
+       2、after的方式
+       以employees表为例
+    -->
+    <insert id="addEmployee" useGeneratedKeys="true" keyProperty="id" databaseId="oracle">
+        /*
+        keyProperty:查出的主键值封装给javaBean的哪个属性
+        order="BEFORE":表示当前sql在插入sql运行之前运行
+        resultType="Integer"：查出的数据的返回值类型是Integer
+        BEFORE的运行顺序：先运行selectKey查询id的sql，查询出id值封装给javaBean的id属性
+                        再运行插入的sql语句，就可以去除id属性对应的值
+
+        */
+        <!--<selectKey keyProperty="id" order="BEFORE" resultType="Integer">
+            /*编写查询主键的sql*/
+            select EMPLOYEES_SEQ.nextval from dual
+        </selectKey>-->
+        /*插入时的主键是从序列中获取到的*/
+        /*insert into employees(EMPLOYEES_ID,LAST_NAME,EMAIL)
+        values(#{id},#{lastName},#{email})*/
+
+        /*
+          After的运行顺序：
+          先运行插入的sql（从序列中取出新值作为id）
+          再运行selectKey查询id的sql
+        */
+        <selectKey keyProperty="id" order="AFTER" resultType="Integer">
+            /*编写查询主键的sql*/
+            select EMPLOYEES_SEQ.currval from dual
+        </selectKey>
+        /*插入时的主键是从序列中获取到的*/
+        insert into employees(EMPLOYEES_ID,LAST_NAME,EMAIL)
+        values(employees_sql.nextval,#{lastName},#{email})
+
+    </insert>
+
+
+    <delete id="deleteEmployee">
+           delete from t_employee where id = #{id}
+    </delete>
+
+    <update id="updateEmployee">
+        update t_employee set last_Name = #{lastName},
+        gender=#{gender},email=#{email} where id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.mrlu.mybatis.dao.EmployeePlusDao">
+     <resultMap id="myResultMap" type="com.mrlu.mybatis.domain.Employee">
+          <id column="id" property="id"></id>
+          <result column="last_Name" property="lastName"></result>
+          <result column="gender" property="gender"></result>
+          <result column="email" property="email"></result>
+     </resultMap>
+     <select id="getEmpById" resultMap="myResultMap">
+          select * from t_employee where id = #{id}
+     </select>
+
+     <!--
+       场景一 : 查询Employee的同时查询员工对应的部门
+               Employee == Department
+               一个员工有与之对应的部门信息
+               id last_Name gender email deptId  dept_id dept_Name
+     -->
+     <!--
+        联合查询，级联属性封装结果集
+     -->
+     <resultMap id="diffResultMap01" type="com.mrlu.mybatis.domain.Employee">
+          <id column="id" property="id"></id>
+          <result column="last_Name" property="lastName"></result>
+          <result column="gender" property="gender"></result>
+          <result column="email" property="email"></result>
+          <result column="dept_id" property="department.id"></result>
+          <result column="dept_Name" property="department.departmentName"></result>
+     </resultMap>
+
+     <!--
+       association关联查询封装结果集
+     -->
+     <resultMap id="diffResultMap02" type="com.mrlu.mybatis.domain.Employee">
+          <id column="id" property="id"></id>
+          <result column="last_Name" property="lastName"></result>
+          <result column="gender" property="gender"></result>
+          <result column="email" property="email"></result>
+          <!--
+             association可以指定联合的javaBean对象
+             property="dept":指定哪个属性是联合的对象
+             javaType：指定这个属性对象的类型【不能省略】
+          -->
+          <association property="department" javaType="com.mrlu.mybatis.domain.Department">
+               <id column="dept_id" property="id"></id>
+               <result column="dept_Name" property="departmentName"></result>
+          </association>
+     </resultMap>
+     <select id="getEmpAndDept" resultMap="diffResultMap02">
+          select e.id id,e.last_Name last_Name,e.gender gender,
+                 e.email email,e.deptId deptId,
+                 d.id dept_id,d.dept_Name dept_Name
+          from t_employee e
+          left join t_dept d
+          on e.deptId = d.id
+          where e.id = #{id}
+     </select>
+
+
+     <!--
+        使用association进行分步查询：
+        1、先按照员工id查询员工信息
+        2、根据查询员工信息的deptId值去查询部门表的部门信息
+        3、把部门信息设置到员工信息中
+     -->
+     <resultMap id="myEmpByStep" type="com.mrlu.mybatis.domain.Employee">
+          <id column="id" property="id"></id>
+          <result column="last_Name" property="lastName"></result>
+          <result column="gender" property="gender"></result>
+          <result column="email" property="email"></result>
+          <!--
+            association定义关联对象的封装规则
+            select:表示当前属性department是调用select指定的方法查出的结果
+            column：指定将哪一列的值传给这个方法
+            【即com.mrlu.mybatis.dao.DepartmentDao的getDeptById方法】
+
+            流程：使用select指定的方法（传入column指定的这列参数的值）查出对象，
+            并封装给property指定的属性
+          -->
+          <association property="department"
+                       select="com.mrlu.mybatis.dao.DepartmentDao.getDeptById"
+                       column="deptId">
+          </association>
+     </resultMap>
+     <select id="getEmpByStep" resultMap="myEmpByStep">
+          select * from t_employee where id = #{id}
+     </select>
+
+     <!--
+        可以使用延时加载：【也叫懒加载/延时加载】
+        Employee ==》Department
+           我们每次查询Employee对象的时候，都将一起出现
+           Department的信息，可以等我们需要使用的时候再去查询
+        如何设置呢？
+        在mybatis的配置文件中配置一下两个属性
+        lazyLoadingEnabled	延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。
+                            特定关联关系中可通过设置 fetchType 属性来覆盖该项的开关状态。设置为true
+        aggressiveLazyLoading	开启时，任一方法的调用都会加载该对象的所有延迟加载属性。
+                                否则，每个延迟加载属性会按需加载（参考 lazyLoadTriggerMethods)。设置为false
+     -->
+    <!--================================association==========================================-->
+     <!--
+        场景二：查询部门的时候对应的所有员工信息也查出来，注释在DepartmentDao.xml看
+     -->
+     <select id="getEmpAndDeptByStep" resultType="com.mrlu.mybatis.domain.Employee">
+          select * from t_employee where deptId = #{deptId}
+     </select>
+
+     <!--================================鉴别器==========================================-->
+     <!--
+         <discriminator javaType="">
+               <case value=""></case>
+          </discriminator>
+
+          鉴别器：mybatis可以还是用discriminator判断某列的值，然后根据某列的值改变封装的行为
+          封装Employee：
+            如果查出的是女生，就把部门信息也查出来，否则不查询
+            如果查出来的是男生，就把last_Name这列的值赋值给email
+     -->
+     <resultMap id="myEmpDis" type="com.mrlu.mybatis.domain.Employee">
+          <id column="id" property="id"></id>
+          <result column="last_Name" property="lastName"></result>
+          <result column="gender" property="gender"></result>
+          <result column="email" property="email"></result>
+          <!--
+            column：指定判定的列名
+            javaType：列值对应的java类型
+          -->
+          <!--string为String类型的别名-->
+          <discriminator javaType="string" column="gender">
+               <!--0表示女生，resultType：指定封装的结果类型.也可以使用resultMap-->
+               <case value="0" resultType="com.mrlu.mybatis.domain.Employee">
+                    <association property="department"
+                                 select="com.mrlu.mybatis.dao.DepartmentDao.getDeptById"
+                                 column="deptId">
+                    </association>
+               </case>
+               <!--1表示男生-->
+               <case value="1" resultType="com.mrlu.mybatis.domain.Employee">
+                    <result column="last_Name" property="email"></result>
+               </case>
+          </discriminator>
+
+     </resultMap>
+     <select id="getEmpByDisc" resultMap="myEmpDis">
+          select * from t_employee where id = #{id}
+     </select>
+
+</mapper>

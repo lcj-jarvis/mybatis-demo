@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--这里面的内容都是有顺序的-->
+
+    <!--指定properties文件的位置。
+        从类路径根开始找文件。即target/classes目录下开始
+        resource：引入类路径下的资源
+        url：引入网络路径或者磁盘路径下的资源
+    -->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--settings包含很多重要的设置项-->
+    <settings>
+        <!--使用log4j的日志，加入依赖和配置文件-->
+        <setting name="logImpl" value="LOG4J"/>
+        <!--<setting name="logImpl" value="STDOUT_LOGGING"/>-->
+        <!--
+           是否开启驼峰命名自动映射，即从经典数据库列名 A_COLUMN 映射到经典 Java 属性名 aColumn
+        -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="cacheEnabled" value="true"/>
+       <!-- <setting name="localCacheScope" value="STATEMENT"/>-->
+    </settings>
+
+    <typeAliases>
+          <!--
+            第一种方式：
+            可以指定一个类型一个自定义别名。不设置alias属性值的话，别名就是类名【不区分大小写】
+            type：自定义类型的全类名
+            alias：别名(短小，容易记忆)
+            有个缺点：如果有很多的类要定义，就要写很多个
+          -->
+       <!-- <typeAlias type="com.mrlu.mybatis.domain.Student" alias="Student"/>
+        <typeAlias type="com.mrlu.mybatis.domain.ParamType" alias="ParamType"/>-->
+
+        <!--
+            第二种方式
+            <package> name是包名，这个包所有的类，类名就是别名(类名不区分大小写)
+
+            这种方式也会存在问题，也容易出错
+            <package name="com.mrlu.mybatis.domain"/>
+            <package name="com.mrlu.mybatis.vo"/>
+             假如这两个包中都有Student类型。，那么执行查询sql语句的时候，如果返回值类型写了Student。
+             那么就会报错。因为不知道是哪个包下的
+        -->
+        <package name="com.mrlu.mybatis.domain"/>
+        <!--
+            如果批量取别名的情况下，有重复的bean，就在bean类上加@Alias注解为某个类型指定新的别名
+        -->
+    </typeAliases>
+    <!--加入PageHelper的插件-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor" />
+    </plugins>
+
+    <environments default="mysql">
+        <environment id="mysql">
+            <transactionManager type="JDBC"/>
+            <!--
+              dataSource:表示数据源，java体系中，规定实现了javax.sql.DataSource接口的都是数据源
+                         数据源表示Connection对象
+
+               type：指定数据源的类型
+                  （1）POOLED:使用连接池，mybatis会创建PooledDataSource类
+                  （2）UNPOOLED:不使用连接池，在每次执行sql语句，先创建连接，执行sql，再关闭连接
+                                 mybatis会创建一个UnPooledDataSource，管理Connection对象的使用
+                  （3）JNDI：java命名和目录服务（windows注册表）
+            -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="SQL Server" value="sqlserver"/>
+        <property name="DB2" value="db2"/>
+    </databaseIdProvider>
+
+    <!--sql mapper(sql映射文件)的位置-->
+    <mappers>
+        <!--
+            第一种方式：指定多个mapper文件
+            多个文件就要写多个mapper标签，会显得冗余
+        -->
+        <!--<mapper resource="com/mrlu/mybatis/dao/StudentDao.xml"/>-->
+
+        <!--
+           第二种方式：
+           name:xml文件(mapper文件)所在的包名，这个包下的所有xml文件一起都能加载给mybatis
+           使用package标签的要求
+           1、mapper文件名称需要和接口名称一样，包括大小写。
+           2、mapper文件和dao接口需要在同一个目录
+        -->
+        <package name="com.mrlu.mybatis.dao"/>
+    </mappers>
+</configuration>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mrlu.mybatis.dao.StudentDao">
+       <!--复用sql语句-->
+       <sql id="studentSql"> select * from  student</sql>
+
+        <!--
+          if
+          <if test="使用参数java对象的属性值作为判断条件，语法 属性 == xxx值">
+
+           当java对象的name属性存在的时候，就进行name = #{}的拼接
+           <if test="name != null and null != ''">
+                 name = #{name}
+           </if>
+
+           当java对象的age属性满足age > 0的时候，就进行name = #{}的拼接
+           <if test="age > 0">
+               or age >  #{age}
+           </if>
+
+           但是这样存在一个问题：
+              如果name条件不满足，age条件满足的话，就会造成sql语句的拼接错误
+
+              所以要在where后面加一个条件。这个条件还不会影响原来的查询结果
+              但是如果name条件满足的话，也会出现错误。真正的解决办法是使用where标签
+        -->
+        <select id="selectStudentIf" resultType="com.mrlu.mybatis.domain.Student">
+           select  * from student where 1 = 1
+           <if test="name != null and null != ''">
+                 name = #{name}
+           </if>
+           <if test="age > 0">
+               or age >  #{age}
+           </if>
+        </select>
+    <!--
+       where标签：封装查询条件
+          <where> <if></if>... </where>
+    -->
+    <select id="selectStudentWhere" resultType="com.mrlu.mybatis.domain.Student">
+        select  * from student
+        <where>
+            <if test="name != null and null != ''">
+                name = #{name}
+            </if>
+            <if test="age > 0">
+                or age >  #{age}
+            </if>
+        </where>
+    </select>
+
+    <!--foreach使用1，List<Integer>-->
+    <select id="selectListOne" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where id in
+        <foreach collection="list" item="stuId" open="(" close=")"
+                 separator="," index="index">
+            #{stuId}
+        </foreach>
+    </select>
+
+    <!--
+        foreach使用2，List<Student>
+        #{stu.id} 可以继续点，因为有get方法
+        select标签里面是写sql语句的所以可以这样写
+
+        <include/> 引入复用的sql语句模板
+    -->
+    <select id="selectListTwo" resultType="com.mrlu.mybatis.domain.Student">
+        <include refid="studentSql"/> where id in(
+        <foreach collection="list" item="stu" separator="," index="index">
+            #{stu.id}
+        </foreach>
+        ,-1)
+    </select>
+
+    <!--同时测试重复的别名和@Alias注解的使用-->
+    <select id="selectAll" resultType="student">
+    <!--<select id="selectAll" resultType="com.mrlu.mybatis.domain.Student">-->
+        select * from student order by id
+    </select>
+</mapper>

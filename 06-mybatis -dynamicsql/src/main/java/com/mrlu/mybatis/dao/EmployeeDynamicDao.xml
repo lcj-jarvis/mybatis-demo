@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.mrlu.mybatis.dao.EmployeeDynamicDao">
+
+    <select id="getEmpsByConditionIf"
+            resultType="com.mrlu.mybatis.domain.Employee">
+        select * from t_employee
+        <!--where标签只会去掉第一个多出来的and或者or-->
+        <where>
+            <!--
+            test:判断表单式（OGNL）
+            OGNL参考尚硅谷ppt或者官方文档 类似于jstl的 c:if test
+
+            从【方法传入的】参数中取值进行判断
+            遇见特殊符号应该去写转义字符【w3school的html实体符号】
+            -->
+            <if test="id != null">
+                <!--用于测试where标签-->
+                and id = #{id}
+            </if>
+            <!--where标签只会去掉第一个多出来的and或者or（或者说去掉前面多出来的and和or）-->
+            <!-- <if test="id != null">
+                &lt;!&ndash;用于测试where标签&ndash;&gt;
+               id = #{id}  and
+            </if>-->
+
+            <!--''空串的实体符号是&quot;-->
+            <if test="lastName != null and lastName != &quot;&quot;">
+                and last_Name like #{lastName}
+            </if>
+
+            <!--<if test="lastName != null and lastName != &quot;&quot;">
+                 last_Name like #{lastName} and
+            </if>-->
+
+            <if test="email != null and  email.trim() != ''">
+                and email = #{email}
+            </if>
+
+            <!--<if test="email != null and  email.trim() != ''">
+               email = #{email}  and
+            </if>-->
+            <!--
+              OGNL会进行字符串与睡着的转换判断
+                $$ 的实体符号是 &amp;&amp;
+            -->
+            <if test="gender == 0 &amp;&amp; gender ==1">
+                and gender = #{gender}
+            </if>
+
+            <!--<if test="gender == 0 &amp;&amp; gender ==1">
+               gender = #{gender}
+            </if>-->
+        </where>
+    </select>
+
+
+    <select id="getEmpsByConditionTrim"
+            resultType="com.mrlu.mybatis.domain.Employee">
+        select * from t_employee
+        <!--
+           后面多出来的and或者or where标签不能解决
+           prefix：前缀：trim标签体中是整个字符串拼接后的结果
+                  prefix给拼串后的整个字符加一个前缀
+           prefixOverrides：前缀覆盖，去掉整个字符串前面多余的字符[这里即是id字段前的and]
+           suffix：后缀
+                  suffix给拼串后的整个字符加一个后缀
+           suffixOverrides：
+                  后缀覆盖，去掉整个字符串后面多余的字符
+        -->
+
+        <trim prefix="where" prefixOverrides="and" suffixOverrides="and">
+            <if test="id != null">
+               and id = #{id} and
+            </if>
+            <if test="lastName != null and lastName != &quot;&quot;">
+               last_Name like #{lastName} and
+            </if>
+            <if test="email != null and  email.trim() != ''">
+                email = #{email} and
+            </if>
+            <if test="gender == 0 &amp;&amp; gender ==1">
+                gender = #{gender}
+            </if>
+        </trim>
+    </select>
+
+    <!--choose(when,otherwise):
+        标签类似于jstl的choose标签
+        分支选择，带了break的switch-case
+        如果带了id就用id查，如果带了lastName就用lastName查，只会进入其中一个
+        有点像sql的case...when
+    -->
+    <select id="getEmpsByConditionChoose" resultType="com.mrlu.mybatis.domain.Employee">
+           select * from t_employee
+           <where>
+               <choose>
+                   <when test="id != null">
+                       id = #{id}
+                   </when>
+                   <when test="lastName != null">
+                       last_Name like #{lastName}
+                   </when>
+                   <when test="email != null">
+                       email = #{email}
+                   </when>
+                   <otherwise>
+                       gender = 0
+                   </otherwise>
+               </choose>
+           </where>
+    </select>
+
+    <update id="updateEmps">
+         update t_employee
+         <!--使用set标签可以去除条件不满足是多余的","号-->
+         <!--<set>
+             <if test="lastName != null">
+                 last_Name = #{lastName},
+             </if>
+             <if test="email != null">
+                 email = #{email},
+             </if>
+             <if test="gender != null">
+                 gender = #{gender},
+             </if>
+         </set>-->
+
+         <!---->
+         <trim prefix="set" suffixOverrides=",">
+             <if test="lastName != null">
+                 last_Name = #{lastName},
+             </if>
+             <if test="email != null">
+                 email = #{email},
+             </if>
+             <if test="gender != null">
+                 gender = #{gender},
+             </if>
+         </trim>
+         <where>
+             <if test="id != null">
+                 id = #{id}
+             </if>
+         </where>
+    </update>
+
+
+    <select id="getEmpsByConditionForeach" resultType="com.mrlu.mybatis.domain.Employee">
+        <!--
+           collection:指定要遍历的集合：
+                      list类型的参数会特殊处理封装在map中，map的key就叫list
+           item：将当前遍历出的元素赋值给指定的变量
+           open：遍历出所有的结果拼接一个开始的字符
+           separator：每个元素之间的分隔符
+           close：遍历出所有的结果拼接一个结束的字符
+           index：索引。遍历list的时候，index就是索引,index就是当前值
+                       遍历map的时候index就代表的是map的key，item就是map的value值
+        -->
+        select * from t_employee
+        <foreach collection="list" item="item_id" open="where id in(" separator="," close=")">
+        <!--<foreach collection="ids" item="item_id" open="where id in(" separator="," close=")">-->
+            #{item_id}
+        </foreach>
+    </select>
+
+    <!--
+       深入理解foreach对象的collection属性
+       foreach遍历的对象，作为入参时，List对象默认用list代替作为存放到底层map的键，数组对象默认用array代替作为键，
+       Map对象没有默认的键，也就是传入的集合(list,array)名字，这个名字可以在foreach里面随便引用
+       当然在作为入参时可以使用@Param注解来设置键，@Param的value属性设置成键之后，list，array将会失效。除入参的这种
+       情况外，还有一种作为参数对象的某个字段的时候。如:
+       1、如果User类有属性List ids。入参时User对象，那么这个collection="ids"
+       2、如果User类有属性Ids ids。其中Ids有个属性List id。入参数User对象，那么collection="ids.id"
+       3、如果传入参数类型为Map。这个入参有注解@Param("params"),则map的所有key集合可以写成param.keys,
+          所有的值集合可以写成params.values.这样foreach就可以对key集合或者值集合进行迭代了。
+    -->
+    <select id="getEmpsByConditionForeachMap" resultType="com.mrlu.mybatis.domain.Employee">
+        select * from t_employee
+        <!--<foreach collection="map.keys" item="item_id" open="where id in(" separator="," close=")">-->
+        <!--<foreach collection="map.values" item="item_id" open="where id in(" separator="," close=")">-->
+        <foreach collection="map" item="item_id" open="where id in(" separator="," close=")">
+            #{item_id}
+        </foreach>
+    </select>
+
+
+    <!--批量插入的第一种方式-->
+    <insert id="addEmps">
+        insert into t_employee(
+        <!--引入sql-->
+        <include refid="insertColumn">
+            <property name="testColumn" value="abc"/>
+        </include>) values
+        <foreach collection="employees" separator="," item="emp">
+            (#{emp.lastName},#{emp.gender},#{emp.email},#{emp.department.id})
+        </foreach>
+    </insert>
+
+    <!--批量插入的第二种方式-->
+    <!--这种方式需要配置数据库连接属性allowMultiQueries=true
+    在数据库的连接文件中配置这个
+    jdbc.url=jdbc:mysql://localhost:3306/ssm?allowMultiQueries=true
+
+    【注意】这种分号分割多个sql语句可以用于其他的批量操作(删除/修改)
+    -->
+    <!--<insert id="addEmps">
+        <foreach collection="employees" separator=";" item="emp">
+            insert into t_employee(last_Name,gender,email,deptId)
+            values(#{emp.lastName},#{emp.gender},#{emp.email},#{emp.department.id})
+        </foreach>
+    </insert>-->
+
+
+    <!--
+      Oracle的数据库批量保存
+      Oracle不支持values(),(),()
+      Oracle支持的批量插入方式
+      以employees表为例
+      1、多个insert放在begin-end里面
+         begin
+            insert into employees(emloyee_id,last_Name,email)
+            values(employees_seq.nextval,"aabb","aabb@qq.com");
+            insert into employees(emloyee_id,last_Name,email)
+            values(employees_seq.nextval,"pdd","pdd@qq.com");
+         end;
+      2、使用中间表
+         insert into employees(employee_id,last_Name,email)
+                  select employees_seq.nextval,lastName,email form(
+                  select "aabb" lastName,"aabb@qq.com" email from dual
+                  union
+                  select "pdd" lastName,"pdd@qq.com" email from dual
+              )
+    -->
+    <!--oracle批量插入的第一种方式-->
+    <!--<insert id="addEmps" databaseId="oracle">
+        <foreach collection="emps" item="emp" open="begin" close="end;" separator=";">
+            insert into employees(emloyee_id,last_Name,email)
+            values(employees_seq.nextval,#{emp.lastName},#{emp.email})
+        </foreach>
+    </insert>-->
+
+    <!--oracle批量插入的第二种方式-->
+   <!-- <insert id="addEmps" databaseId="oracle">
+        insert into employees(employee_id,last_Name,email)
+        select employees_seq.nextval,lastName,email form(
+        <foreach collection="emps" item="emp"  close=")" separator="union">
+            select#{emp.lastName} lastName,#{emp.email} email from dual
+        </foreach>
+    </insert>-->
+    <!--首先要有oracle数据库及对应的表，也要有oracle数据库对应的连接才行-->
+
+
+    <!--
+       两个内置的参数
+        不只是方法传递过来的参数可以被用来判断，取值。。。
+        mybatis默认还有两个内置参数：
+        _parameter：代表整个参数
+            单个参数：_parameter就是这个参数
+            多个参数：参数会被封装为一个map:_parameter就是代表这个map
+
+        _databaseId:如果配置了databaseIdProvider标签
+             _databaseId就是代表当前数据库的别名
+    -->
+
+    <select id="getEmpTestInnerParameter" resultType="com.mrlu.mybatis.domain.Employee" databaseId="mysql">
+        <!--bind可以将OGNL表达式的值绑定在一个变量中，方便后面来引用这个变量的值。
+        但是在模糊查询的时候，不推荐用-->
+        <bind name="_lastName" value="'%'+lastName + '%'"/>
+        <if test="_databaseId=='mysql'">
+            select * from t_employee
+            <if test="_parameter!=null">
+                <!--#{_parameter.lastName}这样也行-->
+                <!--where last_Name like #{_lastName}-->
+                where last_Name like #{lastName}
+            </if>
+        </if>
+        <if test="_databaseId=='oracle'">
+            select * from employees
+        </if>
+    </select>
+
+    <!--
+       1、抽取可重用的sql片段，方便后面引用
+       2、include来引用已经抽取的sql
+       3、include还可以自定义一些property，sql标签内部就能使用自定义的属性
+           include取值的正确方式
+           ${property标签的name属性值}
+           不能使用#{}
+    -->
+    <sql id="insertColumn">
+        <if test="_databaseId=='mysql'">
+            last_Name,gender,email,deptId<!--testColumn-->
+        </if>
+        <if test="_databaseId=='oracle'">
+            employee_id,last_Name,email
+        </if>
+    </sql>
+</mapper>

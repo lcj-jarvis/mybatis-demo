@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mrlu.mybatis.dao.DepartmentDao">
+
+    <select id="getDeptById" resultType="com.mrlu.mybatis.domain.Department">
+        select id,dept_Name as departmentName from t_dept where id = #{id}
+    </select>
+
+    <!--
+      collection嵌套结果集的方式：定义关联的集合类型元素的封装规则
+    -->
+    <!--嵌套结果集的方式，使用collection标签定义关联的集合类型的属性封装规则-->
+    <resultMap id="myGetDeptByIdPlus" type="com.mrlu.mybatis.domain.Department">
+        <id column="id" property="id"></id>
+        <result column="departmentName" property="departmentName"></result>
+        <!--
+           collection定义关联集合类型的属性的封装规则
+           property：要管理的集合
+           ofType：指定集合里面的元素类型
+        -->
+        <collection property="emps" ofType="com.mrlu.mybatis.domain.Employee">
+            <!--定义这个集合中里面的元素类型-->
+            <id column="emp_id" property="id"></id>
+            <result column="last_Name" property="lastName"></result>
+            <result column="gender" property="gender"></result>
+            <result column="email" property="email"></result>
+            <result column="id" property="department.id"></result>
+            <result column="departmentName" property="department.departmentName"></result>
+        </collection>
+    </resultMap>
+    <select id="getDeptByIdPlus" resultMap="myGetDeptByIdPlus">
+            select d.id id,d.dept_Name departmentName,
+                  e.id emp_id,e.last_Name last_Name,e.gender gender,e.email email,e.deptId deptId
+            from t_dept d
+            left join t_employee e
+            on d.id = e.deptId
+            where d.id = 1;
+    </select>
+
+    <!--
+      分步查询部门和部门对应的所有员工
+    -->
+    <resultMap id="MyGetDeptByStep" type="Department">
+        <id column="id" property="id"></id>
+        <result column="dept_Name" property="departmentName"></result>
+        <!--<collection property="emps"
+                    select="com.mrlu.mybatis.dao.EmployeePlusDao.getEmpAndDeptByStep"
+                    column="id"></collection>-->
+        <collection property="emps"
+                    select="com.mrlu.mybatis.dao.EmployeePlusDao.getEmpAndDeptByStep"
+                    column="{deptId=id}" fetchType="lazy"></collection>
+    </resultMap>
+    <select id="getDeptByStep" resultMap="MyGetDeptByStep">
+        select id,dept_Name from t_dept where id = #{id}
+    </select>
+
+    <!--
+       扩展：多列的值传递过去
+       将多列的值封装map传递过去
+       column="{key1=column1,key2=column2}"
+       fetchType="lazy":表示使用延迟加载
+                        lazy-延迟加载
+                        eager：立即加载
+                        如果设置了eager，即使配置文件中配置了懒加载，也会给覆盖为立即加载
+    -->
+
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mrlu.mybatis.dao.StudentDao">
+
+    <!--使用自定义的类型别名-->
+    <!--<select id="selectStudentById" resultType="Student">-->
+    <select id="selectStudentById" resultType="com.mrlu.mybatis.domain.Student">
+        select  * from student where id = #{id}
+    </select>
+
+    <select id="selectMultiParam" resultType="com.mrlu.mybatis.domain.Student">
+         select * from student where name = #{name} or age = #{age}
+    </select>
+
+    <select id="selectParamType" resultType="com.mrlu.mybatis.domain.ParamType">
+         select * from student where name = #{name}
+    </select>
+
+    <!--
+        返回总记录数
+        int 是java.lang.Integer类型的别名
+    -->
+    <select id="countStudent" resultType="int">
+         select count(*) from student;
+    </select>
+
+    <!--
+        返回Map
+        (1)列名是map的key，列值是Map的value
+         select id,name,email from student where id > #{id}
+    -->
+    <!--使用别名也可以-->
+    <select id="selectMapById" resultType="hashmap">
+   <!-- <select id="selectMapById" resultType="java.util.HashMap">-->
+        select id,name,email from student where id > #{id}
+    </select>
+
+    <!--
+       Map返回多条记录
+    -->
+    <select id="selectStuByNameLikeReturnMap" resultType="map">
+        select * from student where name like #{likeName}
+    </select>
+
+    <!--
+       自定义resultMap
+       id:自定义名称
+       type：java类型的全限定名称
+       这也是列名和属性名不同的第一种解决方式
+    -->
+    <resultMap id="myStudentMap" type="com.mrlu.mybatis.domain.MyStudent">
+          <!--定义列名和属性名的对应关系-->
+          <!--
+                主键列，使用id标签,底层会有优化
+                column：列名
+                property：java类型的属性
+          -->
+          <id column="id" property="stuId"></id>
+         <!--其他不指定的列会自动封装【如果能封装得上的话，只要写了resultMap，建议把全部的映射规则都写上】-->
+          <!--
+               非主键列，使用result标签
+               column：类名
+               property：java类型的属性
+          -->
+          <result column="name" property="stuName"></result>
+          <result column="email" property="stuEmail"></result>
+          <result column="age" property="stuAge"></result>
+
+    </resultMap>
+    <!--列名和属性名不一样的第一种解决方式-->
+    <select id="selectMyStudents" resultMap="myStudentMap">
+        select * from student
+    </select>
+
+    <!--列名和属性名不一样的第二种解决方式-->
+    <!--<select id="selectMyStudents" resultType="com.mrlu.mybatis.domain.MyStudent">
+            select id as stuId,name as stuName,email as stuEmail,
+            age as stuAge from student
+        </select>-->
+
+    <!--模糊查询的第一种方式-->
+    <select id="selectLikeOne" resultType="com.mrlu.mybatis.domain.Student">
+        select  * from  student where  name like #{likeName}
+    </select>
+
+    <!--模糊查询的第二种方式-->
+    <select id="selectLikeTwo" resultType="com.mrlu.mybatis.domain.Student">
+        select  * from  student where  name like "%" #{likeName} "%"
+    </select>
+
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/01-mybatis/pom.xml" />
+        <option value="$PROJECT_DIR$/02-mybatis/pom.xml" />
+        <option value="$PROJECT_DIR$/03-mybatis -proxy/pom.xml" />
+        <option value="$PROJECT_DIR$/04-mybatis -proxy/pom.xml" />
+        <option value="$PROJECT_DIR$/05-mybatis -returntype/pom.xml" />
+        <option value="$PROJECT_DIR$/06-mybatis -dynamicsql/pom.xml" />
+        <option value="$PROJECT_DIR$/07-mybatis-crud/pom.xml" />
+        <option value="$PROJECT_DIR$/08-mybatis-cache/pom.xml" />
+        <option value="$PROJECT_DIR$/09-mybatis-generator/pom.xml" />
+        <option value="$PROJECT_DIR$/10-mybatis - source/pom.xml" />
+        <option value="$PROJECT_DIR$/11-mybatis - plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/12-mybatis - batch/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_13" default="false">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

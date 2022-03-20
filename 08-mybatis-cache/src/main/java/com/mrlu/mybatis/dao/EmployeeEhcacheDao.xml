@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mrlu.mybatis.dao.EmployeeEhcacheDao">
+
+    <!--
+      使用ehcache第三方缓存步骤
+      1、加入maven依赖
+        <dependency>
+          <groupId>org.mybatis.caches</groupId>
+          <artifactId>mybatis-ehcache</artifactId>
+          <version>1.2.1</version>
+        </dependency>
+            <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-nop</artifactId>
+          <version>1.7.25</version>
+          <scope>test</scope>
+        </dependency>
+
+      2、在sql映射文件中加入
+        <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+
+      3、在类路径下加入ehcache.xml的配置文件
+    -->
+
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+
+    <insert id="addEmployee" useGeneratedKeys="true" keyProperty="id" databaseId="mysql">
+          insert into t_employee(last_Name,gender,email) values(#{lastName},#{gender},#{email})
+    </insert>
+
+    <select id="getEmpById" resultType="com.mrlu.mybatis.domain.Employee" useCache="true">
+        select * from t_employee
+        <where>
+            <if test="_parameter!=null">
+                id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>

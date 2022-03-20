@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mrlu.mybatis.dao.StudentDao">
+
+    <select id="selectStudents" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student order by id;
+    </select>
+
+    <insert id="insertStudent">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+    <!--
+        parameterType : dao接口中方法参数的数据类型
+        parameterType它的值是java的数据类型全类名
+                     或mybatis定义的别名(mybatis文档的第15页)
+                     【注意这不是我们直接定义的，是mybatis规定好的了】
+        例如：
+            parameterType="java.lang.Integer"
+            parameterType="int"
+
+       【注意】parameterType不是强制的，mybatis通过反射机制能够
+              发现接口参数的数据类型,所以可以没有，一般我们都不写
+
+        使用#{}之后，mybatis执行sql是使用jdbc中的PreparedStatement对象
+           由mybatis执行下面的代码
+            1、mybatis创建connection，PreparedStatement对象
+               Spring sql = "select * from student where id = ?";
+               PreparedStatement pre = connection.preparedStatement(sql);
+               pre.setInt(1,1001);
+
+            2、执行sql封装为 resultType="com.mrlu.mybatis.domain.Student"类型的对象
+              ResultSet set = ps.executeQuery();
+              while(set.next()){
+                  //从数据库去表中的一行数据，存到一个java对象属性中
+                  Student student = new Student();
+                  student.setId(set.getInt("id"));
+                  student.setName(set.getString("name"));
+                  student.setEmail(set.getEmail("email"));
+                  student.setAge(set.getInt("age"));
+              }
+    -->
+<!--<select id="selectStudentById" parameterType="java.lang.Integer" resultType="com.mrlu.mybatis.domain.Student">-->
+    <!--<select id="selectStudentById" parameterType="int" resultType="com.mrlu.mybatis.domain.Student">-->
+
+    <select id="selectStudentById" resultType="com.mrlu.mybatis.domain.Student">
+        select  * from student where id = #{id}
+    </select>
+    <!--
+    /**
+     * 一个简单类型的参数
+     *  简单类型：mybatis把java的基本数据类型和他们的包装类以及String都叫简单类型
+     *  在mapper文件中获取简单类型的一个参数的值，使用#{任意字符}。可以理解成占位符？
+     */
+     -->
+
+    <!--
+        多个类型参数，使用@Param命名
+        【注意】
+        #{myName}  这种方式只能#{}括号里的参数名只能写@Param注解的自定义参数的名称，
+                   然后注解通过定位到name的属性值
+
+        #{myAge}  这种方式只能#{}括号里的参数名只能写@Param注解的自定义参数的名称，
+                  然后注解通过定位到age的属性值
+    -->
+    <select id="selectMultiParam" resultType="com.mrlu.mybatis.domain.Student">
+         select * from student where name = #{myName} or age = #{myAge}
+    </select>
+
+    <!--
+        多个参数，使用java对象的属性值,作为参数实际值
+        使用对象的语法:#{属性名,javaType=java中的类型名称,jdbcType=数据库中的数据类型} 很少用
+        javaType：指java中的属性数据类型
+        jdbcType：在数据库中的数据类型
+        例如：
+           #{paramName,javaType=java.lang.String,jdbcType=VARCHAR}
+        我们使用的简化方式：#{属性名},javaType和javaType可以省略
+
+        #{}规定参数的一些规则
+          参数位置支持的属性
+        – javaType、jdbcType、mode、numericScale、
+        resultMap、typeHandler、jdbcTypeName、expression【未来准备支持的功能】
+
+        jdbcType通常需要在某种特定的条件下被设置：
+           在我们数据为null的时候，有些数据库可能不能识别
+           mybatis对null的处理。比如oracle（报错）
+
+           JdbcType【枚举】 OTHER：无效的类型，因为mybatis对所有的null
+           都映射的是原生JDBC的OTHER类型,oracle不能正确处理。
+
+           根本原因：
+           由于全局配置：jdbcTypeForNull=OTHER，oracle不支持
+           解决方式
+           1、在sql映射文件，写sql语句是。如#{email,jdbcType=OTHER}
+           2、在mybatis全局配置中配置jdbcTypeForNull=NULL
+                <settings>
+                    <setting name="jdbcTypeForNull" value="NULL"/>
+                </settings>
+    -->
+    <!--<select id="selectMultiObject" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name =#{paramName,javaType=java.lang.String,jdbcType=VARCHAR} or
+              age = #{paramAge,javaType=java.lang.Integer,jdbcType=INTEGER}
+    </select>-->
+
+    <select id="selectMultiObject" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name = #{paramName} or
+              age = #{paramAge}
+    </select>
+
+    <select id="selectMultiStudent" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name = #{name} or
+              age = #{age}
+    </select>
+
+    <!--多个参数简单类型，位置参数传值。
+        注意参数的顺序要和sql语句的参数对应上
+        比较少用，容易出错
+    -->
+    <select id="selectMultiStudent2" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name =#{arg0} or
+              age = #{arg1}
+    </select>
+    <!--<select id="selectMultiStudent2" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name =#{param1} or
+              age = #{param2}
+    </select>-->
+
+    <!--多个参数，使用Map，语法格式是${map的key}-->
+    <select id="selectMultiByMap" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where name = #{stuName} and id = #{stuId}
+    </select>
+
+
+    <select id="selectStudent$" resultType="com.mrlu.mybatis.domain.Student">
+       select * from student where name = ${name}
+    </select>
+
+
+    <select id="selectStudentByColumn" resultType="com.mrlu.mybatis.domain.Student">
+       select * from student where ${column}= #{value }
+    </select>
+
+
+    <select id="selectStudentByList" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student where id = #{list[0].id}
+    </select>
+</mapper>

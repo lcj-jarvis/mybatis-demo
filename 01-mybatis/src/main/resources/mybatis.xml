@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--配置文件里的内容编写是有顺序的-->
+
+    <!--settings:控制mybatis的全局行为-->
+    <settings>
+        <!--设置mybatis输出日志-->
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+    </settings>
+
+    <!--
+       environments 环境配置：数据库的连接信息
+       default：必须和某个environment的id值一样
+       告诉mybatis使用哪个数据库的连接信息。也就是访问哪个数据库
+    -->
+    <environments default="test">
+        <!--
+           environment：一个数据库信息的配置，环境
+           id:一个唯一值，自定义，表示环境的名称【即当前环境的唯一标识】
+        -->
+        <environment id="test">
+            <!--
+               transactionManager：mybatis的事务类型
+               type: JDBC|MANAGED 有两种取值
+               【见mybatis的Configuration类】
+               JDBC【JdbcTransactionFactory.class】
+                    这个配置直接使用了 JDBC 的提交和回滚设施，它依赖从数据源获得的连接来管理事务作用域。
+               MANAGED【ManagedTransactionFactory】
+                    这个配置几乎没做什么。它从不提交或回滚一个连接，
+                    而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）。 默认情况下它会关闭连接。
+                    然而一些容器并不希望连接被关闭，
+                    因此需要将 closeConnection 属性设置为 false 来阻止默认的关闭行为
+                    <transactionManager type="MANAGED">
+                      <property name="closeConnection" value="false"/>
+                    </transactionManager>
+
+               如果你正在使用 Spring + MyBatis，则没有必要配置事务管理器，【注意*****】
+               因为 Spring 模块会使用自带的管理器来覆盖前面的配置。
+
+               自定义事务管理器：使用Transaction接口和TransactionFactory接口
+            -->
+            <transactionManager type="JDBC"/>
+            <!--
+               dataSource表示数据源，连接数据库的
+               type：有UNPOOLED|POOLED|JNDI三种取值
+                     表示数据源的类型，POOLED表示使用连接池
+                自定义数据源：实现DataSourceFactory接口，type是全类名
+            -->
+            <dataSource type="POOLED">
+                <!--数据库驱动类名-->
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <!--连接数据库的url-->
+                <property name="url" value="jdbc:mysql://localhost:3306/ssm"/>
+                <!--数据库的用户名-->
+                <property name="username" value="root"/>
+                <!--用户名的密码-->
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+
+        <!--表示线上的数据库，是项目真实使用的数据库-->
+        <environment id="real">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/ssm"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+
+        <!--还可以在这里配置其他数据库-->
+    </environments>
+
+    <!--
+       databaseIdProvider：支持多数据库的厂商
+        type="DB_VENDOR":VendorDatabaseIdProvider
+        作用就是得到数据库厂商的标识【驱动getDatabaseProductName()】
+            mybatis就能使用MySQL、Oracle、SQL Server等数据库
+
+           【注意】还要在environments标签里，配置不同数据库的连接才行
+            注意这里的MySQL的写法
+            而不是Mysql
+    -->
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="SQL Server" value="sqlserver"/>
+        <property name="DB2" value="db2"/>
+    </databaseIdProvider>
+
+    <!--sql mapper(sql映射文件)的位置-->
+    <mappers>
+        <!--
+           1、<mapper resource="mapper映射文件的相对于类路径的路径"/>
+           一个mapper标签指定一个文件的位置
+           从类路径开始的路径信息。  target/classes目录下开始
+           可以写多个
+        -->
+        <!--<mapper resource="com/mrlu/mybatis/dao/StudentDao.xml"/>-->
+        <!--
+           2、注册接口，语法格式<mapper class="接口全类名的方式"/>
+             1、有sql映射文件，映射文件名必须和接口同名，并且放在与接口同一目录下
+                【即都放在类路径下的同一个目录】
+                可以有两种处理方式：
+                a、与接口放在同一个包下
+                b、在resources目录下新建目录，如com/mrlu/mybatis/dao,然后在这个目录里面写映射文件
+             2、没有sql映射文件，所有的sql都是利用注解写在接口上。
+
+             推荐：
+               比较重要的，复杂的Dao接口我们来写sql映射文件
+               不重要，简单的Dao接口，为了开发快速，可以使用注解
+        -->
+       <!-- <mapper class="com.mrlu.mybatis.dao.StudentDao"/>-->
+
+        <!-- 3、将包内的映射器接口实现全部注册为映射器 【推荐用】-->
+        <package name="com.mrlu.mybatis.dao"/>
+    </mappers>
+</configuration>
+<!--
+   mybatis的主配置文件：主要定义了数据库的配置信息，sql映射文件的位置
+   1、约束文件
+     <!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+   mybatis-3-config.dtd：约束文件的名称
+
+   2、configuration：根标签
+
+-->

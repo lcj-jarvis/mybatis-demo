@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+
+    <!--
+         引入jdbc的配置文件
+         解决读取不到jdbc的配置文件的问题：
+         【注意】
+         1、在pom.xml的build标签中不能加入
+
+          <build>
+                <resources>
+                  <resource>
+                    <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+                </resources>
+          </build>
+          这是为了src/main/java/com/mrlu/mybatis/dao下的mapper文件。
+
+          不加入这个后，可以把mapper文件放到src/main/resources/com/mrlu/mybatis/dao目录下
+          在下面配置<sqlMapGenerator>标签
+          <sqlMapGenerator targetPackage="com.mrlu.mybatis.dao"
+                         targetProject="src/main/resources">  //放到resources目录下
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+
+
+        2、仍然保留resources。加多一段内容。
+
+        <resources>
+                <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>false</filtering>
+        </resource>
+        //新增这个，就可以继续暴露
+        <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>false</filtering>
+                </resource>
+        </resources>
+
+        此时sql映射文件既可以在resources目录下的com.mrlu.mybatis.dao包，
+               也可以在java目录下的com.mrlu.mybatis.dao包.
+         <sqlMapGenerator targetPackage="com.mrlu.mybatis.dao"
+                         targetProject="src/main/resources">  //放到resources目录下
+            <property name="enableSubPackages" value="true" />
+         </sqlMapGenerator>
+
+         <sqlMapGenerator targetPackage="com.mrlu.mybatis.dao"
+                         targetProject="src/main/resources">  //放到java目录下
+            <property name="enableSubPackages" value="true" />
+         </sqlMapGenerator>
+
+    -->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--
+    MyBatis3Simple简单版的crud
+    MyBatis3复杂版的
+    -->
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+
+        <!--指定如何连接到数据库的-->
+        <!--<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/ssm?allowMultiQueries=true"
+                        userId="root"
+                        password="root">
+        </jdbcConnection>-->
+
+        <jdbcConnection driverClass="${jdbc.driver}"
+                        connectionURL="${jdbc.url}"
+                        userId="${jdbc.username}"
+                        password="${jdbc.password}">
+        </jdbcConnection>
+        
+
+        <!--java类型解析器-->
+        <javaTypeResolver >
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+
+        <!--
+            指定javaBean的生成策略
+            指定javaBean生成的包名：targetPackage="com.mrlu.mybatis.bean"
+            目标工程，当前工程的src下 ： targetProject="src/main/java"
+        -->
+        <javaModelGenerator targetPackage="com.mrlu.mybatis.bean"
+                            targetProject="src/main/java">
+            <property name="enableSubPackages" value="true" />
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+        <!--
+            sqlMapGenerator：sql映射的生成策略
+            指定sql映射文件的位置：targetPackage="com.mrlu.mybatis.dao"
+            指定当前工程：targetProject="src/main/java"
+            【注意】targetPackage要和dao接口的包名一样，因为最后都要放到根目录的同一个目录下
+                   mybatis才能创建dao的代理对象
+        -->
+        <sqlMapGenerator targetPackage="com.mrlu.mybatis.dao"
+                         targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+
+        <!--
+            直接mapper接口在的位置
+            targetPackage="test.dao"
+            指定所在的工程 targetProject="src/main/java"
+        -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.mrlu.mybatis.dao"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="true" />
+        </javaClientGenerator>
+
+        <!--
+           指定要逆向分析哪些表
+           domainObjectName指定要生成的javaBean类的名称
+           使用配置文件制定表名
+        -->
+        <table tableName="${jdbc.ssm.t_employee}" domainObjectName="Employee" ></table>
+        <table tableName="${jdbc.ssm.t_dept}" domainObjectName="Department"></table>
+    </context>
+
+</generatorConfiguration>

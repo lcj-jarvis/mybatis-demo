@@ -1,0 +1,13 @@
+# Project exclude paths
+/01-mybatis/target/
+/02-mybatis/target/
+/03-mybatis -proxy/target/
+/04-mybatis -proxy/target/
+/05-mybatis -returntype/target/
+/06-mybatis -dynamicsql/target/
+/07-mybatis-crud/target/
+/08-mybatis-cache/target/
+/09-mybatis-generator/target/
+/10-mybatis - source/target/
+/11-mybatis - plugin/target/
+/12-mybatis - batch/target/

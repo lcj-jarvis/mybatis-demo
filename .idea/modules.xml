@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/01-mybatis/01-mybatis.iml" filepath="$PROJECT_DIR$/01-mybatis/01-mybatis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/02-mybatis/02-mybatis.iml" filepath="$PROJECT_DIR$/02-mybatis/02-mybatis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/03-mybatis -proxy/03-mybati-proxys.iml" filepath="$PROJECT_DIR$/03-mybatis -proxy/03-mybati-proxys.iml" />
+      <module fileurl="file://$PROJECT_DIR$/04-mybatis -proxy/04-mybati-proxys.iml" filepath="$PROJECT_DIR$/04-mybatis -proxy/04-mybati-proxys.iml" />
+      <module fileurl="file://$PROJECT_DIR$/05-mybatis -returntype/05-mybatis-returntype.iml" filepath="$PROJECT_DIR$/05-mybatis -returntype/05-mybatis-returntype.iml" />
+      <module fileurl="file://$PROJECT_DIR$/06-mybatis -dynamicsql/06-mybatis -dynamicsql.iml" filepath="$PROJECT_DIR$/06-mybatis -dynamicsql/06-mybatis -dynamicsql.iml" />
+      <module fileurl="file://$PROJECT_DIR$/07-mybatis-crud/07-mybatis-crud.iml" filepath="$PROJECT_DIR$/07-mybatis-crud/07-mybatis-crud.iml" />
+      <module fileurl="file://$PROJECT_DIR$/08-mybatis-cache/08-mybatis-cache.iml" filepath="$PROJECT_DIR$/08-mybatis-cache/08-mybatis-cache.iml" />
+      <module fileurl="file://$PROJECT_DIR$/09-mybatis-generator/09-mybatis-generator.iml" filepath="$PROJECT_DIR$/09-mybatis-generator/09-mybatis-generator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/10-mybatis - source/10-mybatis - source.iml" filepath="$PROJECT_DIR$/10-mybatis - source/10-mybatis - source.iml" />
+      <module fileurl="file://$PROJECT_DIR$/11-mybatis - plugin/11-mybatis - plugin.iml" filepath="$PROJECT_DIR$/11-mybatis - plugin/11-mybatis - plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/12-mybatis - batch/12-mybatis - batch.iml" filepath="$PROJECT_DIR$/12-mybatis - batch/12-mybatis - batch.iml" />
+    </modules>
+  </component>
+</project>

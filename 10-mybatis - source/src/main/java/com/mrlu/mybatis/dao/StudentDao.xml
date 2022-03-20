@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mrlu.mybatis.dao.StudentDao">
+
+    <select id="getStudentById" resultType="com.mrlu.mybatis.domain.Student">
+        select * from student
+        <where>
+            <if test="_parameter != null">
+                id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryStudents" resultType="com.mrlu.mybatis.domain.Student">
+      select * from student order by id
+      /*注意，这里的sql语句写不写分号都行*/
+    </select>
+
+    <insert id="insertStudent">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+
+</mapper>
